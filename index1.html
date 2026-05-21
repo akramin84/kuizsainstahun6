@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz Mega Sains Tahun 6</title>
+    <style>
+        :root {
+            --primary: #008080;
+            --secondary: #ff7f50;
+            --dark: #2f4f4f;
+            --light: #f4f7f6;
+            --success: #2ec4b6;
+            --danger: #e71d36;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #006666;
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .q-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option-item {
+            background: #f9f9f9;
+            border: 2px solid #eee;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            background: #f0f7f7;
+            border-color: var(--primary);
+        }
+
+        .option-item.selected {
+            background: #e6f2f2;
+            border-color: var(--primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+
+        #result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--light);
+            line-height: 150px;
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px auto;
+            border: 5px solid var(--primary);
+        }
+
+        .loading {
+            display: none;
+            color: var(--secondary);
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-screen">
+        <h1>Kuiz Mega Sains Tahun 6</h1>
+        <p class="subtitle">Tajuk: Manusia, Mikroorganisma & Interaksi Antara Hidupan</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 25px;">
+        
+        <div class="form-group">
+            <label for="student-name">Nama Penuh Murid:</label>
+            <input type="text" id="student-name" placeholder="Sila masukkan nama anda..." required>
+        </div>
+        <div class="form-group">
+            <label for="student-class">Kelas:</label>
+            <input type="text" id="student-class" placeholder="Contoh: 6 Cerdas" required>
+        </div>
+        <button class="btn" onclick="startQuiz()">Mula Kuiz</button>
+    </div>
+
+    <div id="quiz-screen" style="display: none;">
+        <div class="status-text">Soalan <span id="current-q-num">1</span> daripada 50</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div id="questions-container"></div>
+        
+        <button class="btn" id="next-btn" onclick="nextQuestion()" style="margin-top: 20px;">Seterusnya</button>
+    </div>
+
+    <div id="result-screen">
+        <h1>Tahniah! Kuiz Selesai</h1>
+        <p>Keputusan anda sedang dihantar terus kepada guru subjek.</p>
+        <div class="score-circle"><span id="final-score">0</span>/50</div>
+        <p id="score-percentage" style="font-size: 18px; font-weight: bold;"></p>
+        <div id="loading-msg" class="loading">Menghantar markah ke Telegram Guru...</div>
+        <div id="status-msg" style="margin-top: 15px; font-weight: bold;"></div>
+    </div>
+</div>
+
+<script>
+    // Konfigurasi Telegram Bot Cikgu Akramin
+    const TELEGRAM_BOT_TOKEN = '8825456874:AAGb3Owl7HNJ1m0rP5fkMJnsQDKFkn8rj3I';
+    const TELEGRAM_CHAT_ID = '6087514961';
+
+    // Bank Soalan (50 Soalan)
+    const quizData = [
+        // --- TAJUK 1: MANUSIA (Soalan 1 - 17) ---
+        { q: "Apakah fungsi utama sistem pembiakan manusia?", a: ["Untuk mengekalkan kemandian spesies", "Untuk menghasilkan tenaga", "Untuk menyingkirkan sisa toksik", "Untuk melawan serangan penyakit"], c: 0 },
+        { q: "Apakah organ pembiakan lelaki yang berfungsi menghasilkan sperma?", a: ["Zakar", "Testis", "Uretra", "Skrotum"], c: 1 },
+        { q: "Apakah organ pembiakan perempuan yang menghasilkan ovum (sel telur)?", a: ["Uterus", "Faraj", "Ovari", "Tiub Fallopio"], c: 2 },
+        { q: "Di manakah proses persenyawaan antara sperma dan ovum biasanya berlaku?", a: ["Uterus", "Tiub Fallopio", "Ovari", "Faraj"], c: 1 },
+        { q: "Apakah maksud proses 'persenyawaan'?", a: ["Proses percantuman sperma dan ovum", "Proses penyingkiran lapisan uterus", "Proses pembahagian sel zigot", "Proses kelahiran bayi"], c: 0 },
+        { q: "Selepas persenyawaan berlaku, zigot akan berkembang menjadi embrio dan menempel di dinding organ mana?", a: ["Ovari", "Faraj", "Uterus", "Tiub Fallopio"], c: 2 },
+        { q: "Berapakah anggaran tempoh masa biasa bagi perkembangan fetus di dalam uterus ibu sebelum dilahirkan?", a: ["6 bulan", "9 bulan", "12 bulan", "3 bulan"], c: 1 },
+        { q: "Apakah fungsi utama sistem saraf manusia?", a: ["Mengangkut gas oksigen", "Mengawal dan menyelaraskan fungsi organ tubuh", "Mencerna makanan kompleks", "Menyokong berat badan"], c: 1 },
+        { q: "Sistem saraf pusat manusia terdiri daripada dua organ utama iaitu...", a: ["Otak dan saraf tunjang", "Otak dan jantung", "Saraf tunjang dan rangkaian saraf", "Jantung dan peparu"], c: 0 },
+        { q: "Apakah fungsi utama saraf tunjang?", a: ["Mengawal tindakan terkawal seperti membaca", "Membawa isyarat dari otak ke saraf periferal dan mengawal tindakan refleks", "Menghasilkan sel saraf baru", "Menyimpan memori jangka panjang"], c: 1 },
+        { q: "Manakah antara berikut merupakan contoh tindakan refleks?", a: ["Menulis nota sains", "Menarik tangan dengan cepat apabila tersentuh cerek panas", "Berenang di kolam", "Menari mengikut rentak muzik"], c: 1 },
+        { q: "Apakah yang membentuk sistem saraf periferal?", a: ["Otak sahaja", "Saraf tunjang sahaja", "Rangkaian saraf yang menghubungkan sistem saraf pusat ke seluruh tubuh", "Sistem saraf yang hanya mengawal perut"], c: 2 },
+        { q: "Apakah kesan buruk sekiranya sistem saraf periferal seseorang mengalami kerosakan?", a: ["Makanan tidak dapat dicerna dengan baik", "Gagal mengesan rangsangan dan koordinasi otot terganggu", "Tulang menjadi sangat rapuh", "Kadar denyutan jantung menjadi sifar"], c: 1 },
+        { q: "Mengapakah pemakaian topi keledar sangat penting semasa menunggang motosikal dari aspek sains?", "a": ["Untuk mengelakkan saman pihak polis", "Untuk melindungi otak daripada kecederaan sekiranya berlaku kemalangan", "Untuk mengekalkan gaya penampilan", "Untuk melindungi rambut daripada habuk"], c: 1 },
+        { q: "Apakah tabiat buruk yang boleh merosakkan fungsi sistem saraf manusia?", a: ["Tidur awal dan cukup", "Mengambil minuman beralkohol dan penyalahgunaan dadah", "Bersenam di padang", "Membaca buku di kawasan terang"], c: 1 },
+        { q: "Bagaimanakah sistem saraf pusat bertindak balas apabila mata anda terpandang sebiji bola meluru laju ke arah muka?", a: ["Otak menghantar isyarat ke otot leher/badan untuk mengelak dengan serta-merta", "Saraf tunjang mengecilkan saiz bola", "Otak menghentikan aliran darah ke mata", "Saraf periferal mencerna maklumat bola dalam masa 5 jam"], c: 0 },
+        { q: "Antara amalan berikut, yang manakah memelihara kesihatan sistem pembiakan dan sistem saraf?", a: ["Makan makanan tinggi kolesterol", "Mandi air sejuk setiap jam", "Mengamalkan gizi seimbang dan menjauhi bahan kimia berbahaya", "Kurang minum air kosong"], c: 2 },
+
+        // --- TAJ
